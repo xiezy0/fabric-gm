@@ -27,14 +27,15 @@ printHelp() {
   echo "would download docker images and binaries for version 1.4.8"
 }
 
+# javaenv
 dockerFabricPull() {
   local FABRIC_TAG=$1
-  for IMAGES in peer orderer ccenv javaenv tools; do
+  for IMAGES in peer orderer ccenv tools; do
       echo "==> FABRIC IMAGE: $IMAGES"
       echo
-      docker pull hyperledger/fabric-$IMAGES:$FABRIC_TAG
-      docker tag hyperledger/fabric-$IMAGES:$FABRIC_TAG hyperledger/fabric-$IMAGES
+      docker pull twblockchain/fabric-$IMAGES
   done
+  docker tag twblockchain/fabric-ccenv twblockchain/fabric-ccenv:1.4
 }
 
 dockerThirdPartyImagesPull() {
@@ -51,8 +52,8 @@ dockerCaPull() {
       local CA_TAG=$1
       echo "==> FABRIC CA IMAGE"
       echo
-      docker pull hyperledger/fabric-ca:$CA_TAG
-      docker tag hyperledger/fabric-ca:$CA_TAG hyperledger/fabric-ca
+      docker pull twblockchain/fabric-ca
+      docker tag twblockchain/fabric-ca twblockchain/fabric-ca
 }
 
 samplesInstall() {
@@ -134,7 +135,7 @@ binaryDownload() {
 
 binariesInstall() {
   echo "===> Downloading version ${FABRIC_TAG} platform specific fabric binaries"
-  binaryDownload ${BINARY_FILE} https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/${ARCH}-${VERSION}/${BINARY_FILE}
+  binaryDownload ${BINARY_FILE} https://hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/${ARCH}-${VERSION}/${BINARY_FILE}
   if [ $? -eq 22 ]; then
      echo
      echo "------> ${FABRIC_TAG} platform specific fabric binary is not available to download <----"
@@ -142,7 +143,7 @@ binariesInstall() {
    fi
 
   echo "===> Downloading version ${CA_TAG} platform specific fabric-ca-client binary"
-  binaryDownload ${CA_BINARY_FILE} https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric-ca/hyperledger-fabric-ca/${ARCH}-${CA_VERSION}/${CA_BINARY_FILE}
+  binaryDownload ${CA_BINARY_FILE} https://hyperledger.org/content/repositories/releases/org/twblockchain/fabric-ca/hyperledger-fabric-ca/${ARCH}-${CA_VERSION}/${CA_BINARY_FILE}
   if [ $? -eq 22 ]; then
      echo
      echo "------> ${CA_TAG} fabric-ca-client binary is not available to download  (Available from 1.1.0-rc1) <----"
@@ -171,8 +172,8 @@ dockerInstall() {
 }
 
 DOCKER=true
-SAMPLES=true
-BINARIES=true
+SAMPLES=false
+BINARIES=false
 
 # Parse commandline args pull out
 # version and/or ca-version strings first
