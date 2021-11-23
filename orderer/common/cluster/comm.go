@@ -9,7 +9,6 @@ package cluster
 import (
 	"bytes"
 	"context"
-	"encoding/pem"
 	"fmt"
 	x509GM "github.com/Hyperledger-TWGC/tjfoc-gm/x509"
 	"sync"
@@ -312,7 +311,10 @@ func (c *Comm) updateStubInMapping(channel string, mapping MemberMapping, node R
 	}
 
 	// Activate the stub
-	stub.Activate(c.createRemoteContext(stub, channel))
+	err := stub.Activate(c.createRemoteContext(stub, channel))
+	if err != nil {
+		return
+	}
 }
 
 // createRemoteStub returns a function that creates a RemoteContext.
@@ -321,11 +323,13 @@ func (c *Comm) updateStubInMapping(channel string, mapping MemberMapping, node R
 func (c *Comm) createRemoteContext(stub *Stub, channel string) func() (*RemoteContext, error) {
 	return func() (*RemoteContext, error) {
 		cert, err := x509GM.ParseCertificate(stub.ServerTLSCert)
-		if err != nil {
-			pemString := string(pem.EncodeToMemory(&pem.Block{Bytes: stub.ServerTLSCert}))
-			c.Logger.Errorf("Invalid DER for channel %s, endpoint %s, ID %d: %v", channel, stub.Endpoint, stub.ID, pemString)
-			return nil, errors.Wrap(err, "invalid certificate DER")
-		}
+		c.Logger.Info(cert)
+		c.Logger.Info(err)
+		//if err != nil {
+		//	pemString := string(pem.EncodeToMemory(&pem.Block{Bytes: stub.ServerTLSCert}))
+		//	c.Logger.Errorf("Invalid DER for channel %s, endpoint %s, ID %d: %v", channel, stub.Endpoint, stub.ID, pemString)
+		//	return nil, errors.Wrap(err, "invalid certificate DER")
+		//}
 
 		c.Logger.Debug("Connecting to", stub.RemoteNode, "for channel", channel)
 
